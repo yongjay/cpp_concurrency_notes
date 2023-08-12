@@ -167,6 +167,8 @@ future对象本身并不提供同步访问。当多个线程需要访问一个�
 
 可以通过参数指定`std::async`的执行方式，`std::launch::defered`，表明函数调用延迟到wait()或get()函数调用时才执行，`std::launch::async`表明函数必须在其所在的独立线程上执行。
 
+**`std::future`在调用`get()`时以及在`std::future`对象析构时都会阻塞，需要注意。**
+
 ### 4.2.2future与任务绑定
 
 `std::packaged_task<>`会将future与函数或可调用对象进行绑定。当调用`std::packaged_task<>`对象时，就会调用相关函数或可调用对象，当future状态为就绪时，会存储返回值。`std::packaged_task`是个可调用对象，可以封装在`std::function`对象中，从而作为线程函数传递到`std::thread`对象中，或作为可调用对象传递到另一个函数中或直接调用。
@@ -258,5 +260,17 @@ int main ()
 
 可以通过调用`set_exception`设置异常值到`std::promise`中。
 
+
+
 ### 4.2.5多个线程的等待
+
+
+
+
+
+三者中`std::async` 接口最简单，做的事情最多，抽象程度最高；`std::packaged_task`，抽象程度次之，需要额外的操作但却比较灵活；`std::promise` 功能最为单一，是三者中抽象程度最低的。
+
+用 std::async 来做简单的事情，例如异步执行一个任务。但是要注意 std::future 析构阻塞的问题。
+std::packaged_task 能够很轻松的拿到 std::future，选择是否配合 std::thread 进行异步处理。同时没有析构阻塞的问题。
+std::promise 是三者中最底层的能力，可以用来同步不同线程之间的消息
 
